@@ -34,11 +34,9 @@ def readFiles() -> None:
     path = "revnAcq.xlsx"
     wb = open_workbook(path)
     s_found    = None
-    #addressCol = None
     cityCol    = None
     provCol    = None
     countryCol = None
-    #codeCol    = None
     addrCols   = None
     for sheet in wb.sheets():
         shname = sheet.name
@@ -49,32 +47,23 @@ def readFiles() -> None:
                 if row == 0:
                     for col in range(sheet.ncols):
                         hdr = sheet.cell(row,col).value
-                        #if "Address" == hdr :
-                        #    addressCol = col
                         if "City" == hdr :
                             cityCol = col
                         elif "Prov./state" == hdr :
                             provCol = col
                         elif "Country" == hdr :
                             countryCol = col
-                        #elif "Pcode" == hdr :
-                        #    codeCol = col
 
-                        #if addressCol is None:
-                        #    print(" addrCol not found")
                         if cityCol is None:
                             print(" cityCol not found")
                         if provCol is None:
                             print(" provCol not found")
                         if countryCol is None:
                             print(" countryCol not found")
-                        #if codeCol is None:
-                        #    print(" codeCol not found")
                         if cityCol is None and provCol is None and countryCol is None:
                             print(" no addr cols found")
                         else:
                             addrCols = (  cityCol, provCol, countryCol)
-                        #addrCols = ( addressCol, cityCol, provCol, countryCol, codeCol)
                 else:
                     addr = ""
                     for col in range(sheet.ncols):
@@ -82,8 +71,17 @@ def readFiles() -> None:
                             addr += ' '
                             addr += sheet.cell(row,col).value
 
-                    if not( addr == "" or addr in all_data.keys()):
-                        all_data[ addr] = "zzz"
+                    if not( addr == ""):
+                        if addr in all_data.keys():
+                            geo_loc = all_data[addr]
+                            count = geo_loc["count"] + 1
+                            geo_loc["count"] = count
+                            #print( addr + ' count is  ' + str(count))
+                        else:
+                            geo_loc = {}
+                            geo_loc["count"] = 1
+                            #print(addr)
+                        all_data[ addr] = geo_loc
                         # print( addr)
     
         if s_found is None :
@@ -96,27 +94,36 @@ def getInfo() -> None:
     API_KEY = os.getenv("GOOGLEAPI")
     g = GoogleV3(api_key=API_KEY)
 
+    count = 0
     for addr in all_data:
         location = None
-        addr = "Ottawa ontario canada"
+        #addr = "Québec  quebec canada"
         print("addr " + addr)
         try:
             location = g.geocode(addr)
-            #        location = g.geocode("O'Reilly Media")
-            all_data[ addr] = location
+            geo_loc = all_data[ addr]
+            geo_loc[ "lat" ]    = location.latitude
+            geo_loc[ "lon" ]    = location.longitude
+            #geo_loc[ "id"  ]    = location.place_id
+            geo_loc[ "address" ]= location.address
+
+            #all_data[ addr] = geo_loc
+            # print( location) # gives  location.address
+            # print( location.raw)
+
             print(addr[:50] + ' -- ' + location.address)
             print('Lat/Lon: {0}, {1}'.format(location.latitude,location.longitude))
             print('https://www.google.ca/maps/@{0},{1},17z'.format(location.latitude,location.longitude))
-        except geopy.exc.GeocoderQueryError as err:
+        except (Exception, geopy.exc.GeocoderQueryError) as err:
             print("geopy error: {0}".format(err))
-        except:
             print('... Failed to get a location for {0}'.format(addr))
-            print("geopy error")
 
-        return
+        if count == 10:
+            return
+        count = count+1
 
 def writeFiles() -> None:
-    with open('locations.json', 'w') as json_file:
+    with open('locations.json', 'w', encoding='utf8') as json_file:
         json.dump(all_data, json_file)
 
 if __name__ == "__main__":
