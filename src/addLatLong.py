@@ -20,18 +20,13 @@ __status__ = "Production"
 
 from xlrd import open_workbook # type: ignore
 from typing import Dict, List
+import os
+import geopy    # pip install geopy
+import geopy.geocoders
+from geopy.geocoders import GoogleV3
 import json
 
-
-all_years = [ ] # type: List[ str]
-
-# Site name keys below match the column headers in the input xlsx
-site_keys = [] # type: List[ str]
-
-species_keys = []
-
 all_data   = {} # type: Dict
-
 
 def readFiles() -> None:
     # read xls, find avg sheet
@@ -47,7 +42,7 @@ def readFiles() -> None:
     addrCols   = None
     for sheet in wb.sheets():
         shname = sheet.name
-        print("zzz"+sheet.name)
+        print("found sheet name "+sheet.name)
         if shname.endswith("Acq xlsx"):
             s_found = 1
             for row in range(sheet.nrows):
@@ -75,18 +70,21 @@ def readFiles() -> None:
                             print(" countryCol not found")
                         #if codeCol is None:
                         #    print(" codeCol not found")
-                        addrCols = (  cityCol, provCol, countryCol)
+                        if cityCol is None and provCol is None and countryCol is None:
+                            print(" no addr cols found")
+                        else:
+                            addrCols = (  cityCol, provCol, countryCol)
                         #addrCols = ( addressCol, cityCol, provCol, countryCol, codeCol)
-                    else:
-                        addr = ""
-                        for col in range(sheet.ncols):
-                            if col in addrCols:
-                                addr += ' '
-                                addr += sheet.cell(row,col).value
+                else:
+                    addr = ""
+                    for col in range(sheet.ncols):
+                        if col in addrCols:
+                            addr += ' '
+                            addr += sheet.cell(row,col).value
 
-                        if not addr in all_data.keys():
-                            all_data[ addr] = "zzz"
-                            print( addr)
+                    if not( addr == "" or addr in all_data.keys()):
+                        all_data[ addr] = "zzz"
+                        # print( addr)
     
         if s_found is None :
             print("sheet not found in " + path)
@@ -94,8 +92,14 @@ def readFiles() -> None:
 
 def getInfo() -> None:
     ''' Google lat lon position for each address '''
+
+    API_KEY = os.getenv("GOOGLEAPI")
+    g = GoogleV3(api_key=API_KEY)
+
     for addr in all_data:
         location = None
+        addr = "Ottawa ontario canada"
+        print("addr " + addr)
         try:
             location = g.geocode(addr)
             #        location = g.geocode("O'Reilly Media")
@@ -103,8 +107,12 @@ def getInfo() -> None:
             print(addr[:50] + ' -- ' + location.address)
             print('Lat/Lon: {0}, {1}'.format(location.latitude,location.longitude))
             print('https://www.google.ca/maps/@{0},{1},17z'.format(location.latitude,location.longitude))
+        except geopy.exc.GeocoderQueryError as err:
+            print("geopy error: {0}".format(err))
         except:
             print('... Failed to get a location for {0}'.format(addr))
+            print("geopy error")
+
         return
 
 def writeFiles() -> None:
