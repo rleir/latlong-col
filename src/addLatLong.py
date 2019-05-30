@@ -34,9 +34,6 @@ def readFiles() -> None:
     path = "revnAcq.xlsx"
     wb = open_workbook(path)
     s_found    = None
-    cityCol    = None
-    provCol    = None
-    countryCol = None
     addrCols   = None
     for sheet in wb.sheets():
         shname = sheet.name
@@ -45,31 +42,14 @@ def readFiles() -> None:
             s_found = 1
             for row in range(sheet.nrows):
                 if row == 0:
-                    for col in range(sheet.ncols):
-                        hdr = sheet.cell(row,col).value
-                        if "City" == hdr :
-                            cityCol = col
-                        elif "Prov./state" == hdr :
-                            provCol = col
-                        elif "Country" == hdr :
-                            countryCol = col
-
-                        if cityCol is None:
-                            print(" cityCol not found")
-                        if provCol is None:
-                            print(" provCol not found")
-                        if countryCol is None:
-                            print(" countryCol not found")
-                        if cityCol is None and provCol is None and countryCol is None:
-                            print(" no addr cols found")
-                        else:
-                            addrCols = (  cityCol, provCol, countryCol)
+                    addrCols = getAddressColumns(sheet,row)
                 else:
                     addr = ""
                     for col in range(sheet.ncols):
                         if col in addrCols:
-                            addr += ' '
                             addr += sheet.cell(row,col).value
+                            addr += ' '
+                    addr = addr.rstrip() # remove the last space
 
                     if not( addr == ""):
                         if addr in all_data.keys():
@@ -87,6 +67,33 @@ def readFiles() -> None:
         if s_found is None :
             print("sheet not found in " + path)
 
+def getAddressColumns(sheet,row):
+    ''' determine which spreadsheet columns contain address info '''
+    cityCol    = None
+    provCol    = None
+    countryCol = None
+    addrCols   = None
+
+    for col in range(sheet.ncols):
+        hdr = sheet.cell(row,col).value
+        if "City" == hdr :
+            cityCol = col
+        elif "Prov./state" == hdr :
+            provCol = col
+        elif "Country" == hdr :
+            countryCol = col
+
+        if cityCol is None:
+            print(" cityCol not found")
+        if provCol is None:
+            print(" provCol not found")
+        if countryCol is None:
+            print(" countryCol not found")
+        if cityCol is None and provCol is None and countryCol is None:
+            print(" no addr cols found")
+        else:
+            addrCols = (  cityCol, provCol, countryCol)
+    return addrCols
 
 def getInfo() -> None:
     ''' Google lat lon position for each address '''
@@ -107,13 +114,13 @@ def getInfo() -> None:
             #geo_loc[ "id"  ]    = location.place_id
             geo_loc[ "address" ]= location.address
 
-            #all_data[ addr] = geo_loc
+            all_data[ addr] = geo_loc
             # print( location) # gives  location.address
             # print( location.raw)
 
-            print(addr[:50] + ' -- ' + location.address)
+            #zzz print(addr[:50] + ' -- ' + location.address)
             print('Lat/Lon: {0}, {1}'.format(location.latitude,location.longitude))
-            print('https://www.google.ca/maps/@{0},{1},17z'.format(location.latitude,location.longitude))
+            #zzz print('https://www.google.ca/maps/@{0},{1},17z'.format(location.latitude,location.longitude))
         except (Exception, geopy.exc.GeocoderQueryError) as err:
             print("geopy error: {0}".format(err))
             print('... Failed to get a location for {0}'.format(addr))
