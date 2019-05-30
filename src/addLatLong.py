@@ -27,8 +27,15 @@ from geopy.geocoders import GoogleV3
 import json
 
 all_data   = {} # type: Dict
+locFileName = 'locations.json'
 
 def readFiles() -> None:
+    # read existing locations, zero each count
+    with open(locFileName) as json_file:
+        all_data = json.load(json_file)
+        for addr in all_data:
+            all_data[addr]["count"] = 0
+
     # read xls, find avg sheet
     # path = "../data/revnAcq.xlsx"
     path = "revnAcq.xlsx"
@@ -104,12 +111,16 @@ def getInfo() -> None:
 
     count = 0
     for addr in all_data:
+        # if we already have location data, then skip to the next addr
+        geo_loc = all_data[ addr]
+        if "lat" in geo_loc:
+            continue
+
         location = None
         #addr = "Québec  quebec canada"
         print("addr " + addr)
         try:
             location = g.geocode(addr)
-            geo_loc = all_data[ addr]
             geo_loc[ "lat" ]    = location.latitude
             geo_loc[ "lon" ]    = location.longitude
             #geo_loc[ "id"  ]    = location.place_id
@@ -131,7 +142,7 @@ def getInfo() -> None:
         count = count+1
 
 def writeFiles() -> None:
-    with open('locations.json', 'w', encoding='utf8') as json_file:
+    with open(locFileName, 'w', encoding='utf8') as json_file:
         json.dump(all_data, json_file)
 
 if __name__ == "__main__":
