@@ -44,26 +44,7 @@ def readFiles() -> None:
                 if row == 0:
                     addrCols = getAddressColumns(sheet,row)
                 else:
-                    addr = ""
-                    for col in range(sheet.ncols):
-                        if col in addrCols:
-                            addr += sheet.cell(row,col).value
-                            addr += ' '
-                    addr = addr.rstrip() # remove the last space
-
-                    if not( addr == ""):
-                        if addr in all_data.keys():
-                            geo_loc = all_data[addr]
-                            count = geo_loc["count"] + 1
-                            geo_loc["count"] = count
-                            #print( addr + ' count is  ' + str(count))
-                        else:
-                            geo_loc = {}
-                            geo_loc["count"] = 1
-                            #print(addr)
-                        all_data[ addr] = geo_loc
-                        # print( addr)
-    
+                    getRowAddress(sheet,row,addrCols)
         if s_found is None :
             print("sheet not found in " + path)
 
@@ -94,6 +75,28 @@ def getAddressColumns(sheet,row):
         else:
             addrCols = (  cityCol, provCol, countryCol)
     return addrCols
+
+def getRowAddress(sheet,row,addrCols):
+    ''' get address info from a spreadsheet row '''
+    addr = ""
+    for col in range(sheet.ncols):
+        if col in addrCols:
+            addr += sheet.cell(row,col).value
+            addr += ' '
+    addr = addr.rstrip() # remove the last space
+
+    if not( addr == ""):
+        if addr in all_data.keys():
+            geo_loc = all_data[addr]
+            count = geo_loc["count"] + 1
+            geo_loc["count"] = count
+            #print( addr + ' count is  ' + str(count))
+        else:
+            geo_loc = {}
+            geo_loc["count"] = 1
+            #print(addr)
+        all_data[ addr] = geo_loc
+        # print( addr)
 
 def getInfo() -> None:
     ''' Google lat lon position for each address '''
