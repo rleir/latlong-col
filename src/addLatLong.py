@@ -88,9 +88,7 @@ def getRowAddress(sheet,row,addrCols):
     if not( addr == ""):
         if addr in all_data.keys():
             geo_loc = all_data[addr]
-            count = geo_loc["count"] + 1
-            geo_loc["count"] = count
-            #print( addr + ' count is  ' + str(count))
+            geo_loc["count"] += 1
         else:
             geo_loc = {}
             geo_loc["count"] = 1
