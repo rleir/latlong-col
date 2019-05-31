@@ -30,6 +30,7 @@ all_data   = {} # type: Dict
 locFileName = 'locations.json'
 
 def readFiles() -> None:
+    global all_data
     # read existing locations, zero each count
     with open(locFileName) as json_file:
         all_data = json.load(json_file)
@@ -85,6 +86,7 @@ def getAddressColumns(sheet,row):
 
 def getRowAddress(sheet,row,addrCols):
     ''' get address info from a spreadsheet row '''
+    global all_data
     addr = ""
     for col in range(sheet.ncols):
         if col in addrCols:
@@ -94,17 +96,15 @@ def getRowAddress(sheet,row,addrCols):
 
     if not( addr == ""):
         if addr in all_data.keys():
-            geo_loc = all_data[addr]
-            geo_loc["count"] += 1
+            all_data[addr]["count"] += 1
         else:
             geo_loc = {}
             geo_loc["count"] = 1
-            #print(addr)
-        all_data[ addr] = geo_loc
-        # print( addr)
+            all_data[ addr] = geo_loc
 
 def getInfo() -> None:
     ''' Google lat lon position for each address '''
+    global all_data
 
     API_KEY = os.getenv("GOOGLEAPI")
     g = GoogleV3(api_key=API_KEY)
@@ -142,6 +142,7 @@ def getInfo() -> None:
         count = count+1
 
 def writeFiles() -> None:
+    global all_data
     with open(locFileName, 'w', encoding='utf8') as json_file:
         json.dump(all_data, json_file)
 
