@@ -23,3 +23,7 @@ Steps:
   for each address, google to find the latlongs
   write the updated locations.json
 
+Bugs
+
+  The address should be saved in UFT-8
+
