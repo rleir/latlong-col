@@ -61,7 +61,7 @@ def reformatInfo() -> None:
             continue # skip this record
         
         properties["place"]=  all_data[addr]["address"]
-        properties["mag"]=    all_data[addr]["count"]
+        properties["mag"]=    float( all_data[addr]["count"])/10
 
         coordinates = []
         coordinates.append(   all_data[addr]["lon"])
