@@ -1,8 +1,43 @@
 # latlong-col
 
+## D3JS spinning globe web graphic
+
+The Nature Museum makes acquisitions worldwide for its collections and to support research. This graphic shows the locations of acquisitons since 1993. The circle size represents the number of acquisitions at that place, on a logarithmic scale.
+
+Since the circles are slightly transparent, overlapping circles add to each other giving a darker shade.
+
+
+Based on Jeremy Ashkenas's excellent d3 example Quakespotter at
+
+  https://observablehq.com/@jashkenas/quakespotter-0-1@1050
+
+A difference is that quakespotter displays Richter magnitudes scaling using the Math.exp function. We have values which are best displayed using the math.log function. Also, we divide by 2 not 5.
+
+Files:
+
+  index.html
+  inspector.css
+  js/quakespotter-0-1.js
+  js/inputs.js
+  data/acquisitions.geojson
+
 ## Handy utility to add latlong data to a xlsx for use in a d3js map.
 
-The ultimate goal is to add a lat/long column to a spreadsheet, using values from a google search for the pre-existing address info.
+Files:
+
+  addLatLong.py
+  reformat.py
+
+Input:
+
+  revnAcq.xlsx
+
+Output:
+
+  locations.json
+
+
+The goal is to get the lat/long values for locations, for use in the D3 globe. We do a google search using the address info from the spreadsheet.
 
 As a stepping stone towards that, we read the xlsx and build a list of lat/lons in a file locations.json. We don't want to be calling Google multiple times for the same location, so we keep track of what has already been done.
 
@@ -26,4 +61,4 @@ Steps:
 Bugs
 
   The address should be saved in UFT-8
-
+  The institution name should get saved with the location data
