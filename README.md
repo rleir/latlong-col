@@ -9,32 +9,32 @@ Since the circles are slightly transparent, overlapping circles add to each othe
 
 Based on Jeremy Ashkenas's excellent d3 example Quakespotter at
 
-  https://observablehq.com/@jashkenas/quakespotter-0-1@1050
+[Observablehq](https://observablehq.com/@jashkenas/quakespotter-0-1@1050)
 
 A difference is that quakespotter displays Richter magnitudes scaling using the Math.exp function. We have values which are best displayed using the math.log function. Also, we divide by 2 not 5.
 
 Files:
 
-  index.html
-  inspector.css
-  js/quakespotter-0-1.js
-  js/inputs.js
-  data/acquisitions.geojson
+*  index.html
+*  inspector.css
+*  js/quakespotter-0-1.js
+*  js/inputs.js
+*  data/acquisitions.geojson
 
 ## Handy utility to add latlong data to a xlsx for use in a d3js map.
 
 Files:
 
-  addLatLong.py
-  reformat.py
+*  addLatLong.py
+*  reformat.py
 
 Input:
 
-  revnAcq.xlsx
+*  revnAcq.xlsx
 
 Output:
 
-  locations.json
+*  locations.json
 
 
 The goal is to get the lat/long values for locations, for use in the D3 globe. We do a google search using the address info from the spreadsheet.
@@ -51,15 +51,15 @@ We should be able to add rows to the xlsx and do another run to get the addition
 
 Steps:
 
-  read locations.json
-  read input xls data file, look for the sheet we need
-  determine which columns contain the address
-  read all rows, saving the address, counting repetitions of an address
-  for each address, google to find the latlongs
-  write the updated locations.json
+*  read locations.json
+*  read input xls data file, look for the sheet we need
+*  determine which columns contain the address
+*  read all rows, saving the address, counting repetitions of an address
+*  for each address, google to find the latlongs
+*  write the updated locations.json
 
 Bugs
 
-  The address should be saved in UFT-8
-  The institution name should get saved with the location data
-  Reformat.py should not be a separate script.
+*  The address should be saved in UFT-8
+*  The institution name should get saved with the location data
+*  Reformat.py should not be a separate script.
