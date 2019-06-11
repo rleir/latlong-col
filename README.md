@@ -62,3 +62,4 @@ Bugs
 
   The address should be saved in UFT-8
   The institution name should get saved with the location data
+  Reformat.py should not be a separate script.
