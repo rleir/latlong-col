@@ -21,7 +21,7 @@ Files:
 *  js/inputs.js
 *  data/acquisitions.geojson
 
-## Handy utility to add latlong data to a xlsx for use in a d3js map.
+## Utility to use info from a xlsx, creating a latlong data json file for use in a d3js or leaflet map.
 
 Files:
 
