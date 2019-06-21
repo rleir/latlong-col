@@ -8,9 +8,7 @@ Handy utility to add latlong data to a xls for use in a d3js map.
   write to the updated locations file
   find the organization name cols from the xls
   get org names, add them to the records
-  write a separate file
-
-            zzz (separate program? or write diff json?) (don't duplicate org names)
+  write a separate file for org names with location
 
 """
 
@@ -150,7 +148,7 @@ def getRowAddress(sheet,row,addrCols):
         else:
             geo_loc = {}
             geo_loc["count"] = 1
-            geo_loc["org name"] = []
+            geo_loc["org names"] = []
             all_data[ addr] = geo_loc
 
 def addInstNames(sheet,row,addrCols,orgCols):
@@ -179,18 +177,14 @@ def addInstNames(sheet,row,addrCols,orgCols):
     print(addr)
     if not( addr == ""):
         if addr in all_data.keys():
-            # name = all_data[addr]["org name"]
-            # name = name + ", " + orgName
-            # all_data[addr]["org name"] = name
 
             if not orgName is "":
-                if not "org name" in all_data[addr].keys():
-                    all_data[addr]["org name"] = []
+                if not "org names" in all_data[addr].keys():
+                    all_data[addr]["org names"] = []
                 #print(                all_data[addr])
-                print(orgName)
-                already_present = linear_search(all_data[addr]["org name"], orgName)
+                already_present = linear_search(all_data[addr]["org names"], orgName)
                 if not already_present:
-                    all_data[addr]["org name"].append( orgName)
+                    all_data[addr]["org names"].append( orgName)
 
         else:
             print("===addr not found " + addr)
