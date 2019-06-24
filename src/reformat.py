@@ -25,7 +25,7 @@ import json
 
 all_data   = {} # type: Dict
 fea_data   = {} # type: Dict
-locFileName = 'locations.json'
+locFileName = 'locationsInstitutions.json'
 feaFileName = 'acquisitions.json'
 
 def readFiles() -> None:
@@ -62,6 +62,9 @@ def reformatInfo() -> None:
         
         properties["place"]=  all_data[addr]["address"]
         properties["mag"]=    float( all_data[addr]["count"])/10
+
+        if "org names" in all_data[addr]:
+            properties["popupContent"] = all_data[addr][ "org names"]
 
         coordinates = []
         coordinates.append(   all_data[addr]["lon"])
