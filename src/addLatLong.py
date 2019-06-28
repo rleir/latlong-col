@@ -54,7 +54,6 @@ def scanSpreadsheet():
     orgCols   = None
     for sheet in wb.sheets():
         shname = sheet.name
-        print("found sheet name "+sheet.name)
         if shname.endswith("Acq xlsx"):
             s_found = 1
             for row in range(sheet.nrows):
@@ -174,14 +173,12 @@ def addInstNames(sheet,row,addrCols,orgCols):
                     orgName += orgInst
 
     addr    =    addr.rstrip() # remove the last space
-    print(addr)
     if not( addr == ""):
         if addr in all_data.keys():
 
             if not orgName is "":
                 if not "org names" in all_data[addr].keys():
                     all_data[addr]["org names"] = []
-                #print(                all_data[addr])
                 already_present = linear_search(all_data[addr]["org names"], orgName)
                 if not already_present:
                     all_data[addr]["org names"].append( orgName)
@@ -190,8 +187,6 @@ def addInstNames(sheet,row,addrCols,orgCols):
             print("===addr not found " + addr)
 
 def linear_search(list,item):
-    print(item)
-    print(list)
     for i in range(len(list)):
         if list[i]==item:
             return True
@@ -213,7 +208,6 @@ def getInfo() -> None:
 
         location = None
         #addr = "Québec  quebec canada"
-        print("addr " + addr)
         try:
             location = g.geocode(addr)
             geo_loc[ "lat" ]    = location.latitude
@@ -226,7 +220,7 @@ def getInfo() -> None:
             # print( location.raw)
 
             #zzz print(addr[:50] + ' -- ' + location.address)
-            print('Lat/Lon: {0}, {1}'.format(location.latitude,location.longitude))
+            #print('Lat/Lon: {0}, {1}'.format(location.latitude,location.longitude))
             #zzz print('https://www.google.ca/maps/@{0},{1},17z'.format(location.latitude,location.longitude))
         except (Exception, geopy.exc.GeocoderQueryError) as err:
             print("geopy error: {0}".format(err))
