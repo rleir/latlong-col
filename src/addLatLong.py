@@ -30,7 +30,11 @@ from geopy.geocoders import GoogleV3
 import json
 
 all_data   = {} # type: Dict
+
+# Input and Output locations file
 locFileName = 'locations.json'
+
+# Output locations-with-popup file
 locInstFilename ='locationsInstitutions.json'
 
 INST_DEPT_LABEL = "Inst Dept"
@@ -171,6 +175,9 @@ def addInstNames(sheet,row,addrCols,orgCols):
                 orgInst = sheet.cell(row,col).value
                 if not orgInst is "":
                     orgName += orgInst
+    # Do not show anything starting with 'Estate ', because it will be followed by a person's name
+    if orgName.startswith("Estate "):
+        orgName = ""
 
     addr    =    addr.rstrip() # remove the last space
     if not( addr == ""):
