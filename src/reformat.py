@@ -25,7 +25,11 @@ import json
 
 all_data   = {} # type: Dict
 fea_data   = {} # type: Dict
+
+# Input locations-with-popup file
 locFileName = 'locationsInstitutions.json'
+
+# Output GeoJson file
 feaFileName = 'acquisitions.json'
 
 def readFiles() -> None:
