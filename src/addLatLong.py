@@ -185,19 +185,15 @@ def addInstNames(sheet,row,addrCols,orgCols):
 
             if not orgName is "":
                 if not "org names" in all_data[addr].keys():
-                    all_data[addr]["org names"] = []
-                already_present = linear_search(all_data[addr]["org names"], orgName)
-                if not already_present:
-                    all_data[addr]["org names"].append( orgName)
+                    all_data[addr]["org names"] = {orgName:1}
+                else:
+                    if orgName in all_data[addr]["org names"]:
+                        all_data[addr]["org names"][orgName] += 1
+                    else:
+                        all_data[addr]["org names"][orgName]=1
 
         else:
             print("===addr not found " + addr)
-
-def linear_search(list,item):
-    for i in range(len(list)):
-        if list[i]==item:
-            return True
-    return False
 
 def getInfo() -> None:
     ''' Google lat lon position for each address '''
