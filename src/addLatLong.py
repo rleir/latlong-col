@@ -29,13 +29,16 @@ import geopy.geocoders
 from geopy.geocoders import GoogleV3
 import json
 
-all_data   = {} # type: Dict
+# input xlsx spreadsheet
+inputfilename = "input.xlsx"
 
 # Input and Output locations file
 locFileName = 'locations.json'
 
 # Output locations-with-popup file
 locInstFilename ='locationsInstitutions.json'
+
+all_data   = {} # type: Dict
 
 INST_DEPT_LABEL = "Inst Dept"
 INST_NAME_LABEL = "Inst Name"
@@ -51,7 +54,7 @@ def readFiles() -> None:
 def scanSpreadsheet():
     # read xls, find avg sheet
     # path = "../data/revnAcq.xlsx"
-    path = "revnAcq.xlsx"
+    path = inputfilename
     wb = open_workbook(path)
     s_found    = None
     addrCols   = None
