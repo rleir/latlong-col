@@ -15,12 +15,7 @@ __maintainer__ = "Richard Leir"
 __email__ = "rleir at leirtech ddot com"
 __status__ = "Production"
 
-from xlrd import open_workbook  # type: ignore
 from typing import Dict, List
-import os
-import geopy
-import geopy.geocoders
-from geopy.geocoders import GoogleV3
 import json
 
 all_data = {}  # type: Dict
@@ -33,14 +28,14 @@ locFileName = 'locationsInstitutions.json'
 feaFileName = 'acquisitions.json'
 
 
-def readFiles() -> None:
+def read_files() -> None:
     global all_data
     # read existing locations, zero each count
     with open(locFileName) as json_file:
         all_data = json.load(json_file)
 
 
-def reformatInfo() -> None:
+def reformat_info() -> None:
     ''' generate feature rec with lat lon position for each address '''
 
     global all_data
@@ -86,7 +81,7 @@ def reformatInfo() -> None:
         features.append(feature)
 
 
-def writeFiles() -> None:
+def write_files() -> None:
     global all_data
     with open(feaFileName, 'w', encoding='utf8') as json_file:
         json.dump(fea_data, json_file)
@@ -95,6 +90,6 @@ def writeFiles() -> None:
 if __name__ == "__main__":
     # execute only if run as a script
 
-    readFiles()
-    reformatInfo()
-    writeFiles()
+    read_files()
+    reformat_info()
+    write_files()

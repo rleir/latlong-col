@@ -44,7 +44,7 @@ INST_DEPT_LABEL = "Inst Dept"
 INST_NAME_LABEL = "Inst Name"
 
 
-def readFiles() -> None:
+def read_files() -> None:
     global all_data
     # read existing locations, zero each count
     with open(locFileName) as json_file:
@@ -53,7 +53,7 @@ def readFiles() -> None:
             all_data[addr]["count"] = 0
 
 
-def scanSpreadsheet():
+def scan_spreadsheet():
     # read xls, find avg sheet
     # path = "../data/revnAcq.xlsx"
     path = inputfilename
@@ -67,29 +67,29 @@ def scanSpreadsheet():
             s_found = 1
             for row in range(sheet.nrows):
                 if row == 0:
-                    addrCols = getAddressColumns(sheet, row)
+                    addrCols = get_address_columns(sheet, row)
                 else:
-                    getRowAddress(sheet, row, addrCols)
+                    get_row_address(sheet, row, addrCols)
             # get any latlong info
-            getInfo()
+            get_info()
 
             # write basic data to a file
-            writeFile(locFileName)
+            write_file(locFileName)
 
             # add the Institution names
             for row in range(sheet.nrows):
                 if row == 0:
-                    orgCols  = getOrgColumns(sheet, row)
+                    orgCols  = get_org_columns(sheet, row)
                 else:
-                    addInstNames(sheet, row, addrCols, orgCols)
+                    add_inst_names(sheet, row, addrCols, orgCols)
             # write augmented data to a different file
-            writeFile(locInstFilename)
+            write_file(locInstFilename)
 
     if s_found is None:
         print("sheet not found in " + path)
 
 
-def getAddressColumns(sheet, row):
+def get_address_columns(sheet, row):
     ''' determine which spreadsheet columns contain address info '''
     cityCol    = None
     provCol    = None
@@ -118,7 +118,7 @@ def getAddressColumns(sheet, row):
     return addrCols
 
 
-def getOrgColumns(sheet, row):
+def get_org_columns(sheet, row):
     ''' determine which spreadsheet columns contain organization name info '''
     deptCol    = None
     nameCol    = None
@@ -142,7 +142,7 @@ def getOrgColumns(sheet, row):
     return orgCols
 
 
-def getRowAddress(sheet, row, addrCols):
+def get_row_address(sheet, row, addrCols):
     ''' get address info from a spreadsheet row '''
     global all_data
     addr = ""
@@ -163,7 +163,7 @@ def getRowAddress(sheet, row, addrCols):
             all_data[addr] = geo_loc
 
 
-def addInstNames(sheet,  row,  addrCols,  orgCols):
+def add_inst_names(sheet,  row,  addrCols,  orgCols):
     ''' get address info from a spreadsheet row '''
     global all_data
     addr = ""
@@ -178,12 +178,12 @@ def addInstNames(sheet,  row,  addrCols,  orgCols):
         if col in orgCols:
             if col is orgCols[0]:
                 orgDept = sheet.cell(row, col).value
-                if orgDept is not "":
+                if orgDept != "":
                     orgName += orgDept
                     orgName += ', '
             elif col is orgCols[1]:
                 orgInst = sheet.cell(row, col).value
-                if orgInst is not "":
+                if orgInst != "":
                     orgName += orgInst
     # Do not show anything starting with 'Estate ',
     #   for privacy: it will be followed by a person's name
@@ -194,7 +194,7 @@ def addInstNames(sheet,  row,  addrCols,  orgCols):
     if not(addr == ""):
         if addr in all_data.keys():
 
-            if orgName is not "":
+            if orgName != "":
                 if "org names" not in all_data[addr].keys():
                     all_data[addr]["org names"] = {orgName: 1}
                 else:
@@ -207,7 +207,7 @@ def addInstNames(sheet,  row,  addrCols,  orgCols):
             print("===addr not found " + addr)
 
 
-def getInfo() -> None:
+def get_info() -> None:
     ''' Google lat lon position for each address '''
     global all_data
 
@@ -248,7 +248,7 @@ def getInfo() -> None:
         count = count+1
 
 
-def writeFile(filename) -> None:
+def write_file(filename) -> None:
     global all_data
     with open(filename, 'w', encoding='utf8') as json_file:
         json.dump(all_data, json_file)
@@ -257,5 +257,5 @@ def writeFile(filename) -> None:
 if __name__ == "__main__":
     # execute only if run as a script
 
-    readFiles()
-    scanSpreadsheet()
+    read_files()
+    scan_spreadsheet()
