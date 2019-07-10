@@ -4,6 +4,7 @@ Handy utility to reformat the locations file for use in a d3js map.
   read input locations data file
   for each location, generate a feature record
   write the features data file
+    (two versions of this file, with and without the Institution Names)
 """
 
 __author__ = "Richard Leir"
@@ -24,8 +25,9 @@ fea_data = {}  # type: Dict
 # Input locations-with-popup file
 locFileName = 'locationsInstitutions.json'
 
-# Output GeoJson file
-feaFileName = 'acquisitions.json'
+# Output GeoJson files
+feaFileName     = 'acquisitions.geojson'
+feaFileNameInst = 'acquisitionsInst.geojson'
 
 
 def read_files() -> None:
@@ -35,11 +37,12 @@ def read_files() -> None:
         all_data = json.load(json_file)
 
 
-def reformat_info() -> None:
+def reformat_info(with_institutions) -> None:
     ''' generate feature rec with lat lon position for each address '''
 
     global all_data
     global fea_data
+    fea_data = {}  # type: Dict
     fea_data["type"] = "FeatureCollection"
     metadata = {}  # some dummy metadata
     metadata["generated"] = 1559586926000   # dummy
@@ -64,11 +67,12 @@ def reformat_info() -> None:
         properties["place"] = all_data[addr]["address"]
         properties["mag"] = float(all_data[addr]["count"])/10
 
-        if "org names" in all_data[addr]:
+        if (with_institutions and "org names" in all_data[addr]):
             properties["popupContent"] = all_data[addr]["org names"]
 
         coordinates = []
         coordinates.append(all_data[addr]["lon"])
+
         coordinates.append(all_data[addr]["lat"])
         coordinates.append(9)
         geometry["type"] = "Point"
@@ -81,9 +85,8 @@ def reformat_info() -> None:
         features.append(feature)
 
 
-def write_files() -> None:
-    global all_data
-    with open(feaFileName, 'w', encoding='utf8') as json_file:
+def write_file(filename) -> None:
+    with open(filename, 'w', encoding='utf8') as json_file:
         json.dump(fea_data, json_file)
 
 
@@ -91,5 +94,7 @@ if __name__ == "__main__":
     # execute only if run as a script
 
     read_files()
-    reformat_info()
-    write_files()
+    reformat_info(with_institutions=False)
+    write_file(feaFileName)
+    reformat_info(with_institutions=True)
+    write_file(feaFileNameInst)
