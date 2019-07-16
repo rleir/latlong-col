@@ -168,6 +168,9 @@ def add_inst_names(sheet,  row,  addrCols,  orgCols):
     global all_data
     addr = ""
     orgName = ""
+    orgInst = ""
+    orgDept = ""
+
     for col in range(sheet.ncols):
         # recreate addr same as we did above
         #    (could use a list and remember it instead)
@@ -188,6 +191,11 @@ def add_inst_names(sheet,  row,  addrCols,  orgCols):
     # Do not show anything starting with 'Estate ',
     #   for privacy: it will be followed by a person's name
     if orgName.startswith("Estate "):
+        orgName = ""
+
+    # Do not show anything with the Inst = "Canadian Museum of Nature"
+    #   we want to know where the acquisition was from, and this record does not tell us
+    if orgInst.startswith("Canadian Museum of Nature"):
         orgName = ""
 
     addr = addr.rstrip()  # remove the last space
