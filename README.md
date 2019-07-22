@@ -1,6 +1,8 @@
 # latlong-col
 
-## D3JS spinning globe web graphic
+## Two Sites
+
+### D3JS spinning globe web graphic
 
 The Nature Museum makes acquisitions worldwide for its collections and to support research. This graphic shows the locations of acquisitons since 1993. The circle size represents the number of acquisitions at that place, on a logarithmic scale.
 
@@ -15,13 +17,33 @@ A difference is that quakespotter displays Richter magnitudes scaling using the 
 
 Files:
 
-*  index.html
-*  inspector.css
-*  js/quakespotter-0-1.js
-*  js/inputs.js
-*  data/acquisitions.geojson
+*  site_spotter/index.html
+*  site_spotter/inspector.css
+*  site_spotter/js/quakespotter-0-1.js
+*  site_spotter/js/inputs.js
+*  site_spotter/data/acquisitions.geojson
+
+### world-map-with-locations
+
+(this site was previouslyin a separate github project)
+The Nature Museum makes acquisitions worldwide for its collections and to support research. This graphic shows the locations of acquisitons since 1993.
+
+The zoomable world map is based on the leaflet.js library with map tiles from OpenStreetMap.
+
+The icons show the locations of institutions. Click on a location to see a popup naming the partner organizations.
+
+The data in GeoJSON format is prepared by the sibling project latlong-col.
+
+Files:
+
+*  site_leaf/index.html
+*  site_leaf/acq.js
+*  site_leaf/acq-geojson.js - data in GeoJSON format
+
 
 ## Utility to use info from a xlsx, creating a latlong data json file for use in a d3js or leaflet map.
+
+The two sites above use data files prepared by this utility.
 
 Files:
 
@@ -30,11 +52,17 @@ Files:
 
 Input:
 
-*  revnAcq.xlsx
+*  input.xlsx
 
-Output:
+Outputs from addLatLong.py:
 
 *  locations.json
+*  locationsInstitutions.json
+
+Outputs from reformat.py:
+
+*  acquisitions.geojson
+*  acquisitionsInst.geojson
 
 
 The goal is to get the lat/long values for locations, for use in the D3 globe. We do a google search using the address info from the spreadsheet.
