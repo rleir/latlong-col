@@ -35,7 +35,10 @@ default_inputfilename = "input.xlsx"
 # Input and Output locations file
 default_locFileName = 'locations.json'
 
-# Output locations-with-popup file
+# Output locations-with-counts file
+default_locCountsFilename = 'locationsCounts.json'
+
+# Output locations-with-institutions file
 default_locInstFilename = 'locationsInstitutions.json'
 
 
@@ -45,16 +48,18 @@ INST_NAME_LABEL = "Inst Name"
 
 class AcqInfo:
 
-    # zzzz locFileName = 'locations.json'
-    # zzzz all_data = {}  # type: Dict
+    all_data = {}  # type: Dict
 
-    def __init__(self, locFileName, locInstFilename):
+    def __init__(self, locFileName, locCountsFileName, locInstFilename):
         self.locFileName = locFileName
+        self.locCountsFileName = locCountsFileName
         self.locInstFilename = locInstFilename
 
         # read existing locations, zero each count
         with open(self.locFileName) as json_file:
             self.all_data = json.load(json_file)
+
+            # init the reference counting
             for addr in self.all_data:
                 self.all_data[addr]["count"] = 0
 
@@ -72,19 +77,23 @@ class AcqInfo:
                     if row == 0:
                         addrCols = self.get_address_columns(sheet, row)
                     else:
-                        self.get_row_address(sheet, row, addrCols)
+                        addr = self.get_row_address(sheet, row, addrCols)
+                        self.save_row_address(addr)
                 # get any latlong info
                 self.get_info()
 
-                # write basic data to a file
-                self.write_file(self.locFileName)
+                # write basic location count data to a file
+                self.write_file(self.locCountsFileName)
 
                 # add the Institution names
                 for row in range(sheet.nrows):
                     if row == 0:
-                        orgCols  = self.get_org_columns(sheet, row)
+                        orgCols = self.get_org_columns(sheet, row)
                     else:
-                        self.add_inst_names(sheet, row, addrCols, orgCols)
+                        addr = self.get_row_address(sheet, row, addrCols)
+                        if not(addr == ""):
+                            orgName = self.get_inst_names(sheet, row, orgCols)
+                            self.add_inst_names(sheet, row, addr, orgName)
                 # write augmented data to a different file
                 self.write_file(self.locInstFilename)
 
@@ -150,31 +159,39 @@ class AcqInfo:
                 addr += sheet.cell(row, col).value
                 addr += ' '
         addr = addr.rstrip()  # remove the last space
+        addr = addr.lstrip()  # remove any leading spaces
+        return addr
 
-        if not(addr == ""):
-            if addr in self.all_data.keys():
+    def save_row_address(self, addr):
+        '''make sure we have a record for addr and count references to it'''
+
+        if addr == "":
+            return
+        if addr.startswith("various"):
+            return
+        if addr.startswith("unknown"):
+            return
+
+        if addr in self.all_data.keys():
+            try:
                 self.all_data[addr]["count"] += 1
+            except (Exception,  KeyError) as err:
+                print("missing addr entry: {0}".format(err))
+                print(addr)
 
-            else:
-                geo_loc = {}
-                geo_loc["count"] = 1
-                geo_loc["org names"] = []
-                self.all_data[addr] = geo_loc
+        else:
+            geo_loc = {}
+            geo_loc["count"] = 1
+            geo_loc["org names"] = []
+            self.all_data[addr] = geo_loc
 
-    def add_inst_names(self, sheet,  row,  addrCols,  orgCols):
+    def get_inst_names(self, sheet, row, orgCols):
         ''' get address info from a spreadsheet row '''
-        addr = ""
         orgName = ""
         orgInst = ""
         orgDept = ""
 
         for col in range(sheet.ncols):
-            # recreate addr same as we did above
-            #    (could use a list and remember it instead)
-            if col in addrCols:
-                addr += sheet.cell(row, col).value
-                addr += ' '
-
             if col in orgCols:
                 if col is orgCols[0]:
                     orgDept = sheet.cell(row, col).value
@@ -185,6 +202,9 @@ class AcqInfo:
                     orgInst = sheet.cell(row, col).value
                     if orgInst != "":
                         orgName += orgInst
+        return orgName
+
+    def add_inst_names(self, sheet,  row,  addr,  orgName):
         # Do not show anything starting with 'Estate ',
         #   for privacy: it will be followed by a person's name
         if orgName.startswith("Estate "):
@@ -193,37 +213,44 @@ class AcqInfo:
         # Do not show anything with the Inst = "Canadian Museum of Nature"
         #   we want to know where the acquisition was from,
         #   and this record does not tell us
-        if orgInst.startswith("Canadian Museum of Nature"):
+        if orgName.endswith("Canadian Museum of Nature"):
             orgName = ""
 
-        addr = addr.rstrip()  # remove the last space
-        if not(addr == ""):
-            if addr in self.all_data.keys():
-
-                if orgName != "":
-                    if "org names" not in self.all_data[addr].keys():
-                        self.all_data[addr]["org names"] = {orgName: 1}
-                    else:
-                        if orgName in self.all_data[addr]["org names"]:
-                            self.all_data[addr]["org names"][orgName] += 1
-                        else:
-                            self.all_data[addr]["org names"][orgName] = 1
-
+        if not(addr in self.all_data.keys()):
+            print("===addr not found " + addr)
+        else:
+            if "org names" not in self.all_data[addr].keys():
+                self.all_data[addr]["org names"] = {orgName: 1}
             else:
-                print("===addr not found " + addr)
+                if orgName in self.all_data[addr]["org names"]:
+                    self.all_data[addr]["org names"][orgName] += 1
+                else:
+                    try:
+                        self.all_data[addr]["org names"][orgName] = 1
+                    except (Exception,  TypeError) as err:
+                        print("missing count entry: {0}".format(err))
+                        print(addr)
 
     def get_info(self) -> None:
         ''' Google lat lon position for each address '''
 
-        API_KEY = os.getenv("GOOGLEAPI")
-        g = GoogleV3(api_key=API_KEY)
-
-        count = 0
+        g = None
+        gcount = 0
         for addr in self.all_data:
+            if addr.startswith("various"):
+                continue
+            elif addr.startswith("unknown"):
+                continue
+
             # if we already have location data, then skip to the next addr
             geo_loc = self.all_data[addr]
             if "lat" in geo_loc:
                 continue
+
+            print(addr)
+            if g is None:
+                API_KEY = os.getenv("GOOGLEAPI")
+                g = GoogleV3(api_key=API_KEY)
 
             location = None
 
@@ -247,9 +274,24 @@ class AcqInfo:
                 print("geopy error: {0}".format(err))
                 print('... Failed to get a location for {0}'.format(addr))
 
-            if count == 10:
+            # limit the number of google lookups per run
+            if gcount >= 10:
                 return
-            count = count+1
+            gcount = gcount+1
+
+    def write_location_DB(self):
+        # remove the location counts and Inst names
+        for addr in self.all_data:
+            # remove orgname key and its entries (a missing key is OK)
+            self.all_data[addr].pop('org names', None)
+            # remove count key (will raise KeyError for missing key)
+            try:
+                self.all_data[addr].pop('count')
+            except (Exception,  KeyError) as err:
+                print("missing count entry: {0}".format(err))
+
+        # update the location DB file
+        self.write_file(self.locFileName)
 
     def write_file(self, filename) -> None:
         with open(filename, 'w', encoding='utf8') as json_file:
@@ -259,6 +301,10 @@ class AcqInfo:
 if __name__ == "__main__":
     # execute only if run as a script
 
-    a1 = AcqInfo(default_locFileName, default_locInstFilename)
+    a1 = AcqInfo(default_locFileName,
+                 default_locCountsFilename,
+                 default_locInstFilename)
 
     a1.scan_spreadsheet(default_inputfilename)
+
+    a1.write_location_DB()
