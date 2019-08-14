@@ -44,6 +44,7 @@ default_locInstFilename = 'locationsInstitutions.json'
 
 INST_DEPT_LABEL = "Inst Dept"
 INST_NAME_LABEL = "Inst Name"
+warn_blank_cells = False
 
 
 class AcqInfo:
@@ -116,14 +117,17 @@ class AcqInfo:
             elif "Country" == hdr:
                 countryCol = col
 
-            if cityCol is None:
-                print(" cityCol not found")
-            if provCol is None:
-                print(" provCol not found")
-            if countryCol is None:
-                print(" countryCol not found")
+            if warn_blank_cells:
+                if cityCol is None:
+                    print(" cityCol not found")
+                if provCol is None:
+                    print(" provCol not found")
+                if countryCol is None:
+                    print(" countryCol not found")
+
             if cityCol is None and provCol is None and countryCol is None:
-                print(" no addr cols found")
+                if warn_blank_cells:
+                    print(" no addr cols found")
             else:
                 addrCols = (cityCol,  provCol,  countryCol)
         return addrCols
@@ -141,12 +145,15 @@ class AcqInfo:
             elif INST_NAME_LABEL == hdr:
                 nameCol = col
 
-            if deptCol is None:
-                print(" org dept Col not found")
-            if nameCol is None:
-                print(" org name Col not found")
+            if warn_blank_cells:
+                if deptCol is None:
+                    print(" org dept Col not found")
+                if nameCol is None:
+                    print(" org name Col not found")
+
             if deptCol is None and nameCol is None:
-                print(" no org cols found")
+                if warn_blank_cells:
+                    print(" no org cols found")
             else:
                 orgCols = (deptCol, nameCol)
         return orgCols
