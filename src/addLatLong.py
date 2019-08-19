@@ -62,7 +62,7 @@ class AcqInfo:
 
             # init the reference counting
             for addr in self.all_data:
-                self.all_data[addr]["count"] = 0
+                self.all_data[addr]["magnitude"] = 0
 
     def scan_spreadsheet(self, xlsx_filename):
         # read xls, find avg sheet
@@ -181,14 +181,14 @@ class AcqInfo:
 
         if addr in self.all_data.keys():
             try:
-                self.all_data[addr]["count"] += 1
+                self.all_data[addr]["magnitude"] += 1
             except (Exception,  KeyError) as err:
                 print("missing addr entry: {0}".format(err))
                 print(addr)
 
         else:
             geo_loc = {}
-            geo_loc["count"] = 1
+            geo_loc["magnitude"] = 1
             geo_loc["org names"] = []
             self.all_data[addr] = geo_loc
 
@@ -235,7 +235,7 @@ class AcqInfo:
                     try:
                         self.all_data[addr]["org names"][orgName] = 1
                     except (Exception,  TypeError) as err:
-                        print("missing count entry: {0}".format(err))
+                        print("missing orgname entry: {0}".format(err))
                         print(addr)
 
     def get_info(self) -> None:
@@ -251,7 +251,7 @@ class AcqInfo:
 
             # if we already have location data, then skip to the next addr
             geo_loc = self.all_data[addr]
-            if "lat" in geo_loc:
+            if "latitude" in geo_loc:
                 continue
 
             print(addr)
@@ -263,8 +263,8 @@ class AcqInfo:
 
             try:
                 location = g.geocode(addr)
-                geo_loc["lat"]     = location.latitude
-                geo_loc["lon"]     = location.longitude
+                geo_loc["latitude"]  = location.latitude
+                geo_loc["longitude"] = location.longitude
                 # geo_loc["id"]    = location.place_id
                 geo_loc["address"] = location.address
 
@@ -296,6 +296,11 @@ class AcqInfo:
                 self.all_data[addr].pop('count')
             except (Exception,  KeyError) as err:
                 print("missing count entry: {0}".format(err))
+            # remove magnitude key (will raise KeyError for missing key)
+            try:
+                self.all_data[addr].pop('magnitude')
+            except (Exception,  KeyError) as err:
+                print("missing mag entry: {0}".format(err))
 
         # update the location DB file
         self.write_file(self.locFileName)

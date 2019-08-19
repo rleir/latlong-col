@@ -65,15 +65,15 @@ def reformat_info(with_institutions) -> None:
             continue    # skip this record
 
         properties["place"] = all_data[addr]["address"]
-        properties["mag"] = float(all_data[addr]["count"])/10
+        properties["mag"] = float(all_data[addr]["magnitude"])/10
 
         if (with_institutions and "org names" in all_data[addr]):
             properties["popupContent"] = all_data[addr]["org names"]
 
         coordinates = []
-        coordinates.append(all_data[addr]["lon"])
+        coordinates.append(all_data[addr]["longitude"])
 
-        coordinates.append(all_data[addr]["lat"])
+        coordinates.append(all_data[addr]["latitude"])
         coordinates.append(9)
         geometry["type"] = "Point"
         geometry["coordinates"] = coordinates

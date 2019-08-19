@@ -28,7 +28,7 @@ def test_open_json():
     a1 = addLatLong.AcqInfo(test_locFileName,
                             test_locCountsFileName,
                             test_locInstFileName)
-    assert a1.all_data["Gloucester Ontario Canada"]["count"] == 0
+    assert a1.all_data["Gloucester Ontario Canada"]["magnitude"] == 0
     a1.write_location_DB()
 
     # output locations DB should be unchanged,
@@ -62,7 +62,7 @@ def test_b_one_row():
 
     # test with one row in the input, having InstName, Prov, Country
     a1.scan_spreadsheet("testData/test_B_one.xlsx")
-    assert a1.all_data["Ontario Canada"]["count"] == 1
+    assert a1.all_data["Ontario Canada"]["magnitude"] == 1
     a1.write_location_DB()
 
     # output locations DB should be unchanged,
@@ -88,7 +88,7 @@ def test_b_two_rows_same_addr():
 
     # test with two rows in the input, both having InstName, Prov, Country
     a1.scan_spreadsheet("testData/test_B_two.xlsx")
-    assert a1.all_data["Ontario Canada"]["count"] == 2
+    assert a1.all_data["Ontario Canada"]["magnitude"] == 2
     a1.write_location_DB()
     # output locations DB should be unchanged,
     #     and should equal the test check file
@@ -115,7 +115,7 @@ def test_c_one_row():
     # test with one row in the input, having InstName, City, Prov, Country
     test_xlsxFileName = "testData/test_C_one.xlsx"
     a1.scan_spreadsheet(test_xlsxFileName)
-    assert a1.all_data["Cornwall Ontario Canada"]["count"] == 1
+    assert a1.all_data["Cornwall Ontario Canada"]["magnitude"] == 1
     a1.write_location_DB()
     # output locations DB should be unchanged,
     #     and should equal the test check file
@@ -142,7 +142,7 @@ def test_c_two_rows_same_addr():
     #      both having InstName, City, Prov, Country
     test_xlsxFileName = "testData/test_C_two.xlsx"
     a1.scan_spreadsheet(test_xlsxFileName)
-    assert a1.all_data["Cornwall Ontario Canada"]["count"] == 2
+    assert a1.all_data["Cornwall Ontario Canada"]["magnitude"] == 2
     a1.write_location_DB()
     # output locations DB should be unchanged,
     #     and should equal the test check file
@@ -168,13 +168,13 @@ def test_a_one_row():
 
     # test with one row in the input, having InstName, Prov, Country
     a1.scan_spreadsheet("testData/test_A_one.xlsx")
-    assert a1.all_data["Russia"]["count"] == 1
+    assert a1.all_data["Russia"]["magnitude"] == 1
     a1.write_location_DB()
 
     # output locations DB should be unchanged,
     #     and should equal the test check file
     assert filecmp.cmp(test_locFileName,
-                       "testData/test_B_oneLocRef.json", shallow=False)
+                       test_initlocFileName, shallow=False)
 
     # output locations counts and inst files
     #      should equal the test reference files
