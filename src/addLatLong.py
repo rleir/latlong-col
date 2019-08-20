@@ -28,6 +28,7 @@ import geopy    # pip install geopy
 import geopy.geocoders
 from geopy.geocoders import GoogleV3
 import json
+from geojsonfile import write_geojson_file
 
 # input xlsx spreadsheet
 default_inputfilename = "input.xlsx"
@@ -37,10 +38,11 @@ default_locFileName = 'locations.json'
 
 # Output locations-with-counts file
 default_locCountsFilename = 'locationsCounts.json'
+default_locCountsGeoJSON = 'acquisitions.geojson'
 
 # Output locations-with-institutions file
 default_locInstFilename = 'locationsInstitutions.json'
-
+default_locInstGeoJSON = 'acquisitionsInst.geojson'
 
 INST_DEPT_LABEL = "Inst Dept"
 INST_NAME_LABEL = "Inst Name"
@@ -51,10 +53,17 @@ class AcqInfo:
 
     all_data = {}  # type: Dict
 
-    def __init__(self, locFileName, locCountsFileName, locInstFilename):
+    def __init__(self,
+                 locFileName,
+                 locCountsFileName,
+                 locCountsGeoJSON,
+                 locInstFilename,
+                 locInstGeoJSON):
         self.locFileName = locFileName
         self.locCountsFileName = locCountsFileName
+        self.locCountsGeoJSON = locCountsGeoJSON
         self.locInstFilename = locInstFilename
+        self.locInstGeoJSON = locInstGeoJSON
 
         # read existing locations, zero each count
         with open(self.locFileName) as json_file:
@@ -84,7 +93,7 @@ class AcqInfo:
                 self.get_info()
 
                 # write basic location count data to a file
-                self.write_file(self.locCountsFileName)
+                self.write_loc_counts_file()
 
                 # add the Institution names
                 for row in range(sheet.nrows):
@@ -95,8 +104,9 @@ class AcqInfo:
                         if not(addr == ""):
                             orgName = self.get_inst_names(sheet, row, orgCols)
                             self.add_inst_names(sheet, row, addr, orgName)
+
                 # write augmented data to a different file
-                self.write_file(self.locInstFilename)
+                self.write_loc_inst_file()
 
         if s_found is None:
             print("sheet not found in " + xlsx_filename)
@@ -286,16 +296,33 @@ class AcqInfo:
                 return
             gcount = gcount+1
 
+    def write_loc_counts_file(self):
+        # still write the old files
+        # write the trad counts output file
+        filename = self.locCountsFileName
+        with open(filename, 'w', encoding='utf8') as json_file:
+            json.dump(self.all_data, json_file)
+
+        filename = self.locCountsGeoJSON
+        write_geojson_file(self.all_data, filename, and_properties=False)
+
+    def write_loc_inst_file(self):
+
+        # still write the old files
+        # write the trad inst output file
+        filename = self.locInstFilename
+        with open(filename, 'w', encoding='utf8') as json_file:
+            json.dump(self.all_data, json_file)
+
+        filename = self.locInstGeoJSON
+        write_geojson_file(self.all_data, filename, and_properties=True)
+
     def write_location_DB(self):
         # remove the location counts and Inst names
         for addr in self.all_data:
             # remove orgname key and its entries (a missing key is OK)
             self.all_data[addr].pop('org names', None)
-            # remove count key (will raise KeyError for missing key)
-            try:
-                self.all_data[addr].pop('count')
-            except (Exception,  KeyError) as err:
-                print("missing count entry: {0}".format(err))
+
             # remove magnitude key (will raise KeyError for missing key)
             try:
                 self.all_data[addr].pop('magnitude')
@@ -303,9 +330,7 @@ class AcqInfo:
                 print("missing mag entry: {0}".format(err))
 
         # update the location DB file
-        self.write_file(self.locFileName)
-
-    def write_file(self, filename) -> None:
+        filename = self.locFileName
         with open(filename, 'w', encoding='utf8') as json_file:
             json.dump(self.all_data, json_file)
 
@@ -315,7 +340,9 @@ if __name__ == "__main__":
 
     a1 = AcqInfo(default_locFileName,
                  default_locCountsFilename,
-                 default_locInstFilename)
+                 default_locCountsGeoJSON,
+                 default_locInstFilename,
+                 default_locInstGeoJSON)
 
     a1.scan_spreadsheet(default_inputfilename)
 

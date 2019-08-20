@@ -19,29 +19,10 @@ __status__ = "Production"
 from typing import Dict, List
 import json
 
-all_data = {}  # type: Dict
-fea_data = {}  # type: Dict
 
-# Input locations-with-popup file
-locFileName = 'locationsInstitutions.json'
-
-# Output GeoJson files
-feaFileName     = 'acquisitions.geojson'
-feaFileNameInst = 'acquisitionsInst.geojson'
-
-
-def read_files() -> None:
-    global all_data
-    # read existing locations, zero each count
-    with open(locFileName) as json_file:
-        all_data = json.load(json_file)
-
-
-def reformat_info(with_institutions) -> None:
+def write_geojson_file(all_data, filename, and_properties) -> None:
     ''' generate feature rec with lat lon position for each address '''
 
-    global all_data
-    global fea_data
     fea_data = {}  # type: Dict
     fea_data["type"] = "FeatureCollection"
     metadata = {}  # some dummy metadata
@@ -63,11 +44,15 @@ def reformat_info(with_institutions) -> None:
 
         if "address" not in all_data[addr]:  # check for key existence
             continue    # skip this record
+        if "magnitude" not in all_data[addr]:  # check for key existence
+            continue    # skip this record
+        if all_data[addr]["magnitude"] <= 0:  # check for unused location
+            continue    # skip this record
 
         properties["place"] = all_data[addr]["address"]
         properties["mag"] = float(all_data[addr]["magnitude"])/10
 
-        if (with_institutions and "org names" in all_data[addr]):
+        if (and_properties and "org names" in all_data[addr]):
             properties["popupContent"] = all_data[addr]["org names"]
 
         coordinates = []
@@ -84,17 +69,7 @@ def reformat_info(with_institutions) -> None:
         feature["id"] = "zzz"
         features.append(feature)
 
-
-def write_file(filename) -> None:
     with open(filename, 'w', encoding='utf8') as json_file:
         json.dump(fea_data, json_file)
 
 
-if __name__ == "__main__":
-    # execute only if run as a script
-
-    read_files()
-    reformat_info(with_institutions=False)
-    write_file(feaFileName)
-    reformat_info(with_institutions=True)
-    write_file(feaFileNameInst)
