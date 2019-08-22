@@ -71,5 +71,3 @@ def write_geojson_file(all_data, filename, and_properties) -> None:
 
     with open(filename, 'w', encoding='utf8') as json_file:
         json.dump(fea_data, json_file)
-
-
