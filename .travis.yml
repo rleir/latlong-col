@@ -2,4 +2,4 @@ language: python
 before_install:
   - sudo apt-get install -y python-pytest
 install: ./install-dependencies.sh
-script: python-pytest
+script: pytest
