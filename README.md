@@ -1,5 +1,7 @@
 # latlong-col
 
+[![Build Status](https://travis-ci.com/rleir/latlong-col.svg?branch=master)](https://travis-ci.com/rleir/latlong-col)
+
 ## Two Sites
 
 ### D3JS spinning globe web graphic
