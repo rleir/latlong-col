@@ -191,11 +191,17 @@ def test_a_one_row():
     assert filecmp.cmp(test_locFileName,
                        test_initlocFileName, shallow=False)
 
-    # output locations counts and inst files
+    # debug locations counts and inst files
     #      should equal the test reference files
     assert filecmp.cmp(test_locCountsFilename,
                        "testData/test_A_oneLocCountsRef.json", shallow=False)
 
     assert filecmp.cmp(test_locInstFilename,
                        "testData/test_A_oneLocInstRef.json", shallow=False)
+    # output locations counts and inst files
+    #      should equal the test reference files
+    assert filecmp.cmp(test_locCountsGeoJSON,
+                       "testData/test_A_oneLocCountsRef.geojson", shallow=False)
+    assert filecmp.cmp(test_locInstGeoJSON,
+                       "testData/test_A_oneLocInstRef.geojson", shallow=False)
     return True
