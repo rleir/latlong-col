@@ -1,7 +1,7 @@
 language: python
 before_install:
-  - sudo apt-get install -y python3-pytest
-  - sudo apt-get install -y python3-xlrd
-  - sudo apt-get install -y python3-geopy
+  - pip3 install pytest
+  - pip3 install xlrd
+  - pip3 install geopy
 install: ./install-dependencies.sh
 script: pytest
