@@ -3,6 +3,5 @@ before_install:
   - sudo apt-get install -y python-pytest
   - sudo apt-get install -y python-xlrd
   - sudo apt-get install -y python-geopy
-  - sudo apt-get install -y python-typing
 install: ./install-dependencies.sh
 script: pytest
