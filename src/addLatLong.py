@@ -22,7 +22,7 @@ __email__ = "rleir at leirtech ddot com"
 __status__ = "Production"
 
 from xlrd import open_workbook  # type: ignore
-from typing import Dict, List
+# from typing import Dict, List
 import os
 import geopy    # pip install geopy
 import geopy.geocoders
