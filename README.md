@@ -19,11 +19,11 @@ A difference is that quakespotter displays Richter magnitudes scaling using the 
 
 Files:
 
-*  site_spotter/index.html
-*  site_spotter/inspector.css
-*  site_spotter/js/quakespotter-0-1.js
-*  site_spotter/js/inputs.js
-*  site_spotter/data/acquisitions.geojson
+*  src/site_spotter/index.html
+*  src/site_spotter/inspector.css
+*  src/site_spotter/js/quakespotter-0-1.js
+*  src/site_spotter/js/inputs.js
+*  src/site_spotter/data/acquisitions.geojson
 
 ### world-map-with-locations
 
@@ -38,9 +38,9 @@ The data in GeoJSON format is prepared by the sibling project latlong-col.
 
 Files:
 
-*  site_leaf/index.html
-*  site_leaf/acq.js
-*  site_leaf/acq-geojson.js - data in GeoJSON format
+*  src/site_leaf/index.html
+*  src/site_leaf/acq.js
+*  src/site_leaf/acq-geojson.js - data in GeoJSON format
 
 
 ## Utility to use info from a xlsx, creating a latlong data json file for use in a d3js or leaflet map.
@@ -49,8 +49,7 @@ The two sites above use data files prepared by this utility.
 
 Files:
 
-*  addLatLong.py
-*  reformat.py
+*  src/addLatLong.py
 
 Input:
 
@@ -59,13 +58,8 @@ Input:
 Outputs from addLatLong.py:
 
 *  locations.json
-*  locationsInstitutions.json
-
-Outputs from reformat.py:
-
 *  acquisitions.geojson
 *  acquisitionsInst.geojson
-
 
 The goal is to get the lat/long values for locations, for use in the D3 globe. We do a google search using the address info from the spreadsheet.
 
