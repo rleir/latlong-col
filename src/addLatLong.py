@@ -103,7 +103,7 @@ class AcqInfo:
                         addr = self.get_row_address(sheet, row, addrCols)
                         if not(addr == ""):
                             orgName = self.get_inst_names(sheet, row, orgCols)
-                            self.add_inst_names(sheet, row, addr, orgName)
+                            self.add_inst_names(addr, orgName)
 
                 # write augmented data to a different file
                 self.write_loc_inst_file()
@@ -221,7 +221,7 @@ class AcqInfo:
                         orgName += orgInst
         return orgName
 
-    def add_inst_names(self, sheet,  row,  addr,  orgName):
+    def add_inst_names(self, addr,  orgName):
         # Do not show anything starting with 'Estate ',
         #   for privacy: it will be followed by a person's name
         if orgName.startswith("Estate "):
