@@ -743,7 +743,7 @@ function text(config = {}) {
     size,
     submit
   } = config;
-  if (typeof config == "string") value = config;
+
   const form = input({
     type: "text",
     title,
@@ -999,7 +999,7 @@ function number(config = {}) {
     min,
     max
   } = config;
-  if (typeof config == "number") value = config;
+
   const form = input({
     type: "number",
     title,
@@ -1055,7 +1055,7 @@ function password(config = {}) {
     size,
     submit
   } = config;
-  if (typeof config == "string") value = config;
+
   const form = input({
     type: "password",
     title,
