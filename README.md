@@ -1,6 +1,7 @@
 # latlong-col
 
 [![Build Status](https://travis-ci.com/rleir/latlong-col.svg?branch=master)](https://travis-ci.com/rleir/latlong-col)
+[![DeepScan grade](https://deepscan.io/api/teams/5622/projects/7455/branches/75998/badge/grade.svg)](https://deepscan.io/dashboard#view=project&tid=5622&pid=7455&bid=75998)
 
 ## Two Sites
 
