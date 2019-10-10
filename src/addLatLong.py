@@ -74,45 +74,43 @@ class AcqInfo:
                 self.all_data[addr]["magnitude"] = 0
 
     def scan_spreadsheet(self, xlsx_filename):
-        # read xls, find avg sheet
+        # read xls, find sheets
         wb = open_workbook(xlsx_filename)
-        s_found    = None
         addrCols   = None
         orgCols    = None
+        coordsCols = None
         for sheet in wb.sheets():
-            shname = sheet.name
-            if shname.endswith("Acq xlsx"):
-                s_found = 1
-                for row in range(sheet.nrows):
-                    if row == 0:
-                        addrCols = self.get_address_columns(sheet, row)
-                    else:
-                        addr = self.get_row_address(sheet, row, addrCols)
+            for row in range(sheet.nrows):
+                if row == 0:
+                    addrCols = self.get_address_columns(sheet, row)
+                    orgCols = self.get_org_columns(sheet, row)
+                    coordsCols = self.get_coords_columns(sheet, row)
+                else:
+                    addr = self.get_row_address(sheet, row, addrCols)
+                    if not(addr == ""):
                         self.save_row_address(addr)
-                # get any latlong info
-                self.get_info()
+                        # add the Institution names
+                        orgName = self.get_inst_names(sheet, row, orgCols)
+                        self.add_inst_names(addr, orgName)
+                    if coordsCols is not None:
+                        coords = self.get_row_coords(sheet, row, coordsCols)
+                        self.save_row_coords(addr, coords)
+        # get any latlong info
+        if coordsCols is None:
+            self.get_info()
 
-                # write basic location count data to a file
-                self.write_loc_counts_file()
+        # write augmented data including insti names to a file
+        self.write_loc_inst_file()
 
-                # add the Institution names
-                for row in range(sheet.nrows):
-                    if row == 0:
-                        orgCols = self.get_org_columns(sheet, row)
-                    else:
-                        addr = self.get_row_address(sheet, row, addrCols)
-                        if not(addr == ""):
-                            orgName = self.get_inst_names(sheet, row, orgCols)
-                            self.add_inst_names(addr, orgName)
+        # remove insti name information
+        self.remove_inst_element()
 
-                # write augmented data to a different file
-                self.write_loc_inst_file()
-
-        if s_found is None:
-            print("sheet not found in " + xlsx_filename)
+        # write basic location count data to a file
+        self.write_loc_counts_file()
 
     def get_address_columns(self, sheet, row):
         ''' determine which spreadsheet columns contain address info '''
+        locaCol    = None
         cityCol    = None
         provCol    = None
         countryCol = None
@@ -120,9 +118,13 @@ class AcqInfo:
 
         for col in range(sheet.ncols):
             hdr = sheet.cell(row, col).value
-            if "City" == hdr:
+            if "Location" == hdr:
+                locaCol = col
+            elif hdr.startswith("City"):
                 cityCol = col
             elif "Prov./state" == hdr:
+                provCol = col
+            elif "Province" == hdr:
                 provCol = col
             elif "Country" == hdr:
                 countryCol = col
@@ -139,14 +141,14 @@ class AcqInfo:
                 if warn_blank_cells:
                     print(" no addr cols found")
             else:
-                addrCols = (cityCol,  provCol,  countryCol)
+                addrCols = (locaCol, cityCol,  provCol,  countryCol)
         return addrCols
 
     def get_org_columns(self, sheet, row):
         ''' determine which spreadsheet cols contain organization name info '''
-        deptCol    = None
-        nameCol    = None
-        orgCols    = None
+        deptCol = None
+        nameCol = None
+        orgCols = None
 
         for col in range(sheet.ncols):
             hdr = sheet.cell(row, col).value
@@ -167,6 +169,26 @@ class AcqInfo:
             else:
                 orgCols = (deptCol, nameCol)
         return orgCols
+
+    def get_coords_columns(self, sheet, row):
+        ''' determine which spreadsheet cols contain lat lon info '''
+        latCol     = None
+        lonCol     = None
+        coordsCols = None
+
+        for col in range(sheet.ncols):
+            hdr = sheet.cell(row, col).value
+            if "Latitude" == hdr:
+                latCol = col
+            elif "Longitude" == hdr:
+                lonCol = col
+
+        if latCol is None or lonCol is None:
+            if warn_blank_cells:
+                print(" no coords cols found")
+        else:
+            coordsCols = (latCol, lonCol)
+        return coordsCols
 
     def get_row_address(self, sheet, row, addrCols):
         ''' get address info from a spreadsheet row '''
@@ -221,6 +243,19 @@ class AcqInfo:
                         orgName += orgInst
         return orgName
 
+    def get_row_coords(self, sheet, row, coordsCols):
+        ''' get coords info from a spreadsheet row '''
+        (latCol, lonCol) = coordsCols
+        latVal = None
+        lonVal = None
+
+        for col in range(sheet.ncols):
+            if col == latCol:
+                latVal = sheet.cell(row, col).value
+            elif col == lonCol:
+                lonVal = sheet.cell(row, col).value
+        return (latVal, lonVal)
+
     def add_inst_names(self, addr,  orgName):
         # Do not show anything starting with 'Estate ',
         #   for privacy: it will be followed by a person's name
@@ -247,6 +282,20 @@ class AcqInfo:
                     except (Exception,  TypeError) as err:
                         print("missing orgname entry: {0}".format(err))
                         print(addr)
+
+    def save_row_coords(self, addr, coords):
+        (latVal, lonVal) = coords
+
+        if not(addr in self.all_data.keys()):
+            print("===addr not found " + addr)
+        else:
+            # In this case, coords do not come from the locations db,
+            #   they come from the xlsx row.
+            geo_loc = {}
+            geo_loc["magnitude"] = 1
+            geo_loc["latitude"]  = latVal
+            geo_loc["longitude"] = lonVal
+            self.all_data[addr] = geo_loc
 
     def get_info(self) -> None:
         ''' Google lat lon position for each address '''
@@ -295,6 +344,11 @@ class AcqInfo:
             if gcount >= 10:
                 return
             gcount = gcount+1
+
+    # remove all the "org names" elements
+    def remove_inst_element(self):
+        for i, (k, v) in enumerate(self.all_data.items()):
+            v.pop("org names", None)
 
     def write_loc_counts_file(self):
         # still write the old files
