@@ -24,18 +24,11 @@ def init_test_loc_file():
 def test_open_json():
     init_test_loc_file()
 
-    # read the locations json and initialize data structures:
-    #               clear the count to 0
-    # but do not scan the spreadsheet
     a1 = addLatLong.AcqInfo(test_locFileName,
                             test_locCountsFilename,
                             test_locCountsGeoJSON,
                             test_locInstFilename,
                             test_locInstGeoJSON)
-
-    assert a1.all_data["Gloucester Ontario Canada"]["magnitude"] == 0
-    a1.write_location_DB()
-
     # output locations DB should be unchanged,
     #     and should equal the test check file
     assert filecmp.cmp(test_locFileName,
@@ -69,6 +62,7 @@ def test_b_one_row():
 
     # test with one row in the input, having InstName, Prov, Country
     a1.scan_spreadsheet("testData/test_B_one.xlsx")
+    assert a1.all_data["Gloucester Ontario Canada"]["magnitude"] == 0
     assert a1.all_data["Ontario Canada"]["magnitude"] == 1
     a1.write_location_DB()
 

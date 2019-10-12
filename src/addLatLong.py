@@ -51,7 +51,8 @@ warn_blank_cells = False
 
 class AcqInfo:
 
-    all_data = {}  # type: Dict
+    all_data = None  # type: Dict
+    coords_found_in_xlsx = None
 
     def __init__(self,
                  locFileName,
@@ -65,36 +66,46 @@ class AcqInfo:
         self.locInstFilename = locInstFilename
         self.locInstGeoJSON = locInstGeoJSON
 
-        # read existing locations, zero each count
-        with open(self.locFileName) as json_file:
-            self.all_data = json.load(json_file)
-
-            # init the reference counting
-            for addr in self.all_data:
-                self.all_data[addr]["magnitude"] = 0
-
     def scan_spreadsheet(self, xlsx_filename):
         # read xls, find sheets
         wb = open_workbook(xlsx_filename)
-        addrCols   = None
-        orgCols    = None
-        coordsCols = None
         for sheet in wb.sheets():
+            addrCols   = None
+            orgCols    = None
+            coordsCols = None
             for row in range(sheet.nrows):
-                if row == 0:
+                # the header row might not be the first one, so
+                # try to get get the header row until we find it
+                if addrCols is None:
                     addrCols = self.get_address_columns(sheet, row)
                     orgCols = self.get_org_columns(sheet, row)
                     coordsCols = self.get_coords_columns(sheet, row)
+                    if coordsCols is not None:
+                        self.coords_found_in_xlsx = True
                 else:
+                    if self.all_data is None:
+                        if self.coords_found_in_xlsx is not None:
+                            self.all_data = {}
+                        else:
+                            # read existing locations DB
+                            with open(self.locFileName) as json_file:
+                                self.all_data = json.load(json_file)
+
+                                # init the reference counting
+                                for addr in self.all_data:
+                                    self.all_data[addr]["magnitude"] = 0
+
                     addr = self.get_row_address(sheet, row, addrCols)
                     if not(addr == ""):
                         self.save_row_address(addr)
                         # add the Institution names
-                        orgName = self.get_inst_names(sheet, row, orgCols)
-                        self.add_inst_names(addr, orgName)
+                        if orgCols is not None:
+                            orgName = self.get_inst_names(sheet, row, orgCols)
+                            self.add_inst_names(addr, orgName)
                     if coordsCols is not None:
                         coords = self.get_row_coords(sheet, row, coordsCols)
                         self.save_row_coords(addr, coords)
+
         # get any latlong info
         if coordsCols is None:
             self.get_info()
@@ -118,16 +129,19 @@ class AcqInfo:
 
         for col in range(sheet.ncols):
             hdr = sheet.cell(row, col).value
-            if "Location" == hdr:
-                locaCol = col
-            elif hdr.startswith("City"):
-                cityCol = col
-            elif "Prov./state" == hdr:
-                provCol = col
-            elif "Province" == hdr:
-                provCol = col
-            elif "Country" == hdr:
-                countryCol = col
+            try:
+                if "Location" == hdr:
+                    locaCol = col
+                elif hdr.startswith("City"):
+                    cityCol = col
+                elif "Prov./state" == hdr:
+                    provCol = col
+                elif "Province" == hdr:
+                    provCol = col
+                elif "Country" == hdr:
+                    countryCol = col
+            except AttributeError:
+                print("looking for a col header, but cell value is ", hdr)
 
             if warn_blank_cells:
                 if cityCol is None:
@@ -193,10 +207,16 @@ class AcqInfo:
     def get_row_address(self, sheet, row, addrCols):
         ''' get address info from a spreadsheet row '''
         addr = ""
-        for col in range(sheet.ncols):
-            if col in addrCols:
-                addr += sheet.cell(row, col).value
-                addr += ' '
+
+        try:
+            for col in range(sheet.ncols):
+                if col in addrCols:
+                    cellval = sheet.cell(row, col).value
+                    addr += cellval
+                    addr += ' '
+        except TypeError:
+            print("looking for an address string, but cell value is ", cellval)
+
         addr = addr.rstrip()  # remove the last space
         addr = addr.lstrip()  # remove any leading spaces
         return addr
@@ -269,7 +289,8 @@ class AcqInfo:
             orgName = ""
 
         if not(addr in self.all_data.keys()):
-            print("===addr not found " + addr)
+            if addr != "":
+                print("===addr not found " + addr)
         else:
             if "org names" not in self.all_data[addr].keys():
                 self.all_data[addr]["org names"] = {orgName: 1}
@@ -287,7 +308,8 @@ class AcqInfo:
         (latVal, lonVal) = coords
 
         if not(addr in self.all_data.keys()):
-            print("===addr not found " + addr)
+            if addr != "":
+                print("===addr not found " + addr)
         else:
             # In this case, coords do not come from the locations db,
             #   they come from the xlsx row.
@@ -372,6 +394,10 @@ class AcqInfo:
         write_geojson_file(self.all_data, filename, and_properties=True)
 
     def write_location_DB(self):
+        # if we did not use the locations DB, then do not update it
+        if self.coords_found_in_xlsx is not None:
+            return
+
         # remove the location counts and Inst names
         for addr in self.all_data:
             # remove orgname key and its entries (a missing key is OK)
