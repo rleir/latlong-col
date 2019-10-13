@@ -315,6 +315,7 @@ class AcqInfo:
             #   they come from the xlsx row.
             geo_loc = {}
             geo_loc["magnitude"] = 1
+            geo_loc["address"] = addr
             geo_loc["latitude"]  = latVal
             geo_loc["longitude"] = lonVal
             self.all_data[addr] = geo_loc
