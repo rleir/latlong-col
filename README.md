@@ -62,17 +62,19 @@ Outputs from addLatLong.py:
 *  acquisitions.geojson
 *  acquisitionsInst.geojson
 
-The goal is to get the lat/long values for locations, for use in the D3 globe. We do a google search using the address info from the spreadsheet.
+The goal is to get the lat/long values for locations, for use in the D3 globe. We do a google search using the address info from the spreadsheet. Alternately, the coordinates can be provided in columns labeled Latitude and Longitude, in which case Google will not be consulted.
 
-As a stepping stone towards that, we read the xlsx and build a list of lat/lons in a file locations.json. We don't want to be calling Google multiple times for the same location, so we keep track of what has already been done.
+When Google is being consulted, we save a list of lat/lons in a file locations.json. We don't want to be calling Google every time this program is run, so we keep track of what has already been searched. This locations file is not consulted when the input contains Lat lon columns for the coordinates.
 
-We occasionally get timeouts from Google, so we have an algorithm which can be run multiple times, each time adding to locations.json.
+We occasionally experience timeouts from Google, so we have an algorithm which can be run multiple times, each time adding to locations.json.
 
 During development we limit the number of google searches to 10 per run.
 
 You need an API key from Google for use in searches. Store the key in the GOOGLEAPI environment variable before running addLatLong.py .  Before the first run, manually create a null locations.json file.
 
 We should be able to add rows to the xlsx and do another run to get the additional locations.
+
+The column headers do not need to be the first row of the input, but they do need to precede the data. Also, if any rows before the headers contain notes or legends which are similar to a header then there can be confusion .. I.E. a note starting with "City of ..." will be mistaken for the City column header, causing a failed run.
 
 Steps:
 
