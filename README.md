@@ -3,7 +3,11 @@
 [![Build Status](https://travis-ci.com/rleir/latlong-col.svg?branch=master)](https://travis-ci.com/rleir/latlong-col)
 [![DeepScan grade](https://deepscan.io/api/teams/5622/projects/7455/branches/75998/badge/grade.svg)](https://deepscan.io/dashboard#view=project&tid=5622&pid=7455&bid=75998)
 
-## Two Sites
+## Two Sites and a data preparation utility
+
+You will notice some similarities with the connection-map project. Both projects get input information from xlsx spreadsheets and display interactive LeafletJS maps.
+
+Both projects share the locations.json DB. You might want to use filesystem links and make sure you don't run both data utilities simultaneously.
 
 ### D3JS spinning globe web graphic
 
