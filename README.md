@@ -80,6 +80,16 @@ We should be able to add rows to the xlsx and do another run to get the addition
 
 The column headers do not need to be the first row of the input, but they do need to precede the data. Also, if any rows before the headers contain notes or legends which are similar to a header then there can be confusion .. I.E. a note starting with "City of ..." will be mistaken for the City column header, causing a failed run.
 
+Test it:
+
+$ cd src
+$ flake8
+$ pytest
+
+Run it:
+
+$ python3 addLatLong.py
+
 Steps:
 
 *  read locations.json
