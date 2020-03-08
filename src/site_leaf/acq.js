@@ -28,7 +28,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
 			    popupContent += "</ul>";
 			}
         }
-		layer.bindPopup(popupContent);
+		layer.bindTooltip(popupContent); // or bindPopup
 	}
 
 	L.geoJSON([bicycleRental], {
@@ -44,6 +44,17 @@ document.addEventListener("DOMContentLoaded", function(event) {
 		}
 	}).addTo(map);
 
+    const params = new URLSearchParams(document.location.search);
+    const l = params.get("l");
+    var para_name = "";
+    if(l === "fr"){
+        //display:none
+        para_name = "fr_para";
+    } else {
+        para_name = "en_para";
+    }
+    var x = document.getElementById(para_name);
+    x.style.display = "block";
 });
 
     
